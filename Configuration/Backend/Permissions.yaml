@@ -1,0 +1,32 @@
+TYPO3:
+  CMS:
+    Permission:
+      Actions:
+        - 
+          identifier: 'dashboard:view'
+        - 
+          identifier: 'dashboard:add-widget'
+        - 
+          identifier: 'dashboard:remove-widget'
+        - 
+          identifier: 'dashboard:edit-settings'
+        - 
+          identifier: 'dashboard:edit-permissions'
+      Resources:
+        -
+          identifier: 'dashboard:dashboard'
+          actions:
+            - 'dashboard:view'
+            - 'dashboard:add-widget'
+            - 'dashboard:remove-widget'
+            - 'dashboard:edit-settings'
+            - 'dashboard:edit-permissions'
+        -
+          identifier: 'dashboard:widget'
+          actions:
+            - 'dashboard:view'
+            - 'dashboard:edit-settings'
+            - 'dashboard:edit-permissions'
+          inheritances:
+            - 'dashboard:dashboard'
+

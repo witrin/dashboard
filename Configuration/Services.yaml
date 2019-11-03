@@ -4,6 +4,11 @@ services:
     autoconfigure: true
     public: false
 
+  cache.runtime:
+    class: TYPO3\CMS\Core\Cache\Frontend\FrontendInterface
+    factory: ['@TYPO3\CMS\Core\Cache\CacheManager', 'getCache']
+    arguments: ['runtime']
+
   FriendsOfTYPO3\Dashboard\:
     resource: '../Classes/*'
 
@@ -11,3 +16,11 @@ services:
     public: true
   FriendsOfTYPO3\Dashboard\Controller\WidgetAjaxController:
     public: true
+  FriendsOfTYPO3\Dashboard\Security\Permission\PermissionAttributeProvider:
+    arguments:
+      $cache: '@cache.runtime'
+    tags:
+      -
+        name: event.listener
+        identifier: 'dashboard-permission-provider'
+        event: TYPO3\CMS\Security\Event\AttributeRetrivalEvent

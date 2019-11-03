@@ -7,6 +7,9 @@ use FriendsOfTYPO3\Dashboard\Configuration\Widget;
 use FriendsOfTYPO3\Dashboard\DashboardConfiguration;
 use FriendsOfTYPO3\Dashboard\Dashboards\AbstractDashboard;
 use FriendsOfTYPO3\Dashboard\Dashboards\DashboardRepository;
+use FriendsOfTYPO3\Dashboard\Security\Attribute\DashboardAttribute;
+use FriendsOfTYPO3\Dashboard\Security\Attribute\ViewAttribute;
+use FriendsOfTYPO3\Dashboard\Security\Attribute\WidgetAttribute;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException as RouteNotFoundExceptionAlias;
@@ -19,6 +22,8 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\PathUtility;
 use TYPO3\CMS\Extbase\Mvc\View\ViewInterface;
 use TYPO3\CMS\Fluid\View\StandaloneView;
+use TYPO3\CMS\Security\Policy\PolicyDecision;
+use TYPO3\CMS\Security\Policy\PolicyDecisionPoint;
 
 /**
  * Class DashboardController
@@ -69,6 +74,7 @@ class DashboardController extends AbstractController
         $this->uriBuilder = $uriBuilder ?? GeneralUtility::makeInstance(UriBuilder::class);
         $this->dashboardConfiguration = $dashboardConfiguration ?? GeneralUtility::makeInstance(DashboardConfiguration::class);
         $this->dashboardRepository = $dashboardRepository ?? GeneralUtility::makeInstance(DashboardRepository::class);
+        $this->policyDecisionPoint = GeneralUtility::makeInstance(PolicyDecisionPoint::class);
     }
 
     /**
@@ -144,8 +150,18 @@ class DashboardController extends AbstractController
         $this->getCssForWidgets($availableWidgets);
 
         $widgets = [];
+        $dashboardAttribute = new DashboardAttribute($currentDashboard);
         foreach ($dashboards[$currentDashboard]->getConfiguration()['widgets'] as $widgetHash => $widget) {
-            $widgets[$widgetHash] = $this->dashboardRepository->createWidgetRepresentation($widget['identifier'], $widget['config']);
+            $policyDecision = $this->policyDecisionPoint->authorize([
+                'resource' => new WidgetAttribute($widget['identifier'], $widgetHash, $dashboardAttribute),
+                'action' => new ViewAttribute()
+            ]);
+            if (!$policyDecision->isApplicable()) {
+                throw new \RuntimeException('No applicable policy found', 1572687491);
+            }
+            if ($policyDecision->getValue() === PolicyDecision::PERMIT) {
+                $widgets[$widgetHash] = $this->dashboardRepository->createWidgetRepresentation($widget['identifier'], $widget['config']);
+            }
         }
         $this->view->assignMultiple([
             'widgets' => $widgets,
@@ -261,10 +277,18 @@ class DashboardController extends AbstractController
      */
     protected function getDashboardsForCurrentUser(): array
     {
-        // @TODO: filter here for access restrictions later
         $dashboards = [];
         foreach ($this->dashboardRepository->getAllDashboards() as $dashboard) {
-            $dashboards[$dashboard->getIdentifier()] = $dashboard;
+            $policyDecision = $this->policyDecisionPoint->authorize([
+                'resource' => new DashboardAttribute($dashboard->getIdentifier()),
+                'action' => new ViewAttribute()
+            ]);
+            if (!$policyDecision->isApplicable()) {
+                throw new \RuntimeException('No applicable policy found', 1572627070);
+            }
+            if ($policyDecision->getValue() === PolicyDecision::PERMIT) {
+                $dashboards[$dashboard->getIdentifier()] = $dashboard;
+            }
         }
         return $dashboards;
     }

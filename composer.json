@@ -42,6 +42,7 @@
   },
   "require": {
     "typo3/cms-core": "^9.5 || 10.*@dev",
+    "typo3/cms-security": "dev-feature/backend-permissions",
     "psr/http-message": "^1.0",
     "symfony/finder": "^4.3",
     "typo3fluid/fluid": "^2.5"
@@ -70,6 +71,12 @@
       "web-dir": ".build/public"
     }
   },
+  "repositories": [
+    {
+        "type": "git",
+        "url": "https://github.com/typo3-initiatives/security"
+    }
+  ],
   "scripts": {
     "test:php:lint": [
       "phplint"
