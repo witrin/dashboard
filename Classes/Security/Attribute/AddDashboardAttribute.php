@@ -16,19 +16,11 @@ namespace FriendsOfTYPO3\Dashboard\Security\Attribute;
  * The TYPO3 project - inspiring people to share!
  */
 
-use TYPO3\CMS\Backend\Security\Attribute\ResourceAttribute;
+use TYPO3\CMS\Security\Attribute\ActionAttribute;
 
 /**
  * @api
  */
-final class DashboardAttribute extends ResourceAttribute
+final class AddDashboardAttribute extends ActionAttribute
 {
-    /**
-     * @inheritdoc
-     */
-    public function __construct(string $identifier)
-    {
-        parent::__construct($identifier);
-        $this->identifier = $this->class . ':' . $identifier;
-    }
 }

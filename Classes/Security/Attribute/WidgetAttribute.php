@@ -40,8 +40,8 @@ final class WidgetAttribute extends ResourceAttribute
     public function __construct(string $type, string $identifier, DashboardAttribute $dashboard)
     {
         parent::__construct($identifier);
-
         $this->dashboard = $dashboard;
         $this->type = $this->class . ':' . AttributeUtility::translateClassNameToPolicyName($type);
+        $this->identifier = $this->class . ':' . $identifier;
     }
 }

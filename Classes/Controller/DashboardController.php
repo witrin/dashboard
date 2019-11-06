@@ -7,7 +7,10 @@ use FriendsOfTYPO3\Dashboard\Configuration\Widget;
 use FriendsOfTYPO3\Dashboard\DashboardConfiguration;
 use FriendsOfTYPO3\Dashboard\Dashboards\AbstractDashboard;
 use FriendsOfTYPO3\Dashboard\Dashboards\DashboardRepository;
+use FriendsOfTYPO3\Dashboard\Security\Attribute\AddDashboardAttribute;
+use FriendsOfTYPO3\Dashboard\Security\Attribute\AddWidgetAttribute;
 use FriendsOfTYPO3\Dashboard\Security\Attribute\DashboardAttribute;
+use FriendsOfTYPO3\Dashboard\Security\Attribute\RemoveWidgetAttribute;
 use FriendsOfTYPO3\Dashboard\Security\Attribute\ViewAttribute;
 use FriendsOfTYPO3\Dashboard\Security\Attribute\WidgetAttribute;
 use Psr\Http\Message\ResponseInterface;
@@ -22,7 +25,6 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\PathUtility;
 use TYPO3\CMS\Extbase\Mvc\View\ViewInterface;
 use TYPO3\CMS\Fluid\View\StandaloneView;
-use TYPO3\CMS\Security\Policy\PolicyDecision;
 use TYPO3\CMS\Security\Policy\PolicyDecisionPoint;
 
 /**
@@ -59,6 +61,11 @@ class DashboardController extends AbstractController
     protected $dashboardRepository;
 
     /**
+     * @var PolicyDecisionPoint
+     */
+    protected $policyDecisionPoint;
+
+    /**
      * @var array
      */
     protected $cssFiles = [];
@@ -68,13 +75,13 @@ class DashboardController extends AbstractController
      */
     protected $jsFiles = [];
 
-    public function __construct(ModuleTemplate $moduleTemplate = null, UriBuilder $uriBuilder = null, DashboardConfiguration $dashboardConfiguration = null, DashboardRepository $dashboardRepository = null)
+    public function __construct(ModuleTemplate $moduleTemplate = null, UriBuilder $uriBuilder = null, DashboardConfiguration $dashboardConfiguration = null, DashboardRepository $dashboardRepository = null, PolicyDecisionPoint $policyDecisionPoint = null)
     {
         $this->moduleTemplate = $moduleTemplate ?? GeneralUtility::makeInstance(ModuleTemplate::class);
         $this->uriBuilder = $uriBuilder ?? GeneralUtility::makeInstance(UriBuilder::class);
         $this->dashboardConfiguration = $dashboardConfiguration ?? GeneralUtility::makeInstance(DashboardConfiguration::class);
         $this->dashboardRepository = $dashboardRepository ?? GeneralUtility::makeInstance(DashboardRepository::class);
-        $this->policyDecisionPoint = GeneralUtility::makeInstance(PolicyDecisionPoint::class);
+        $this->policyDecisionPoint = $policyDecisionPoint ?? GeneralUtility::makeInstance(PolicyDecisionPoint::class);
     }
 
     /**
@@ -152,14 +159,10 @@ class DashboardController extends AbstractController
         $widgets = [];
         $dashboardAttribute = new DashboardAttribute($currentDashboard);
         foreach ($dashboards[$currentDashboard]->getConfiguration()['widgets'] as $widgetHash => $widget) {
-            $policyDecision = $this->policyDecisionPoint->authorize([
-                'resource' => new WidgetAttribute($widget['identifier'], $widgetHash, $dashboardAttribute),
-                'action' => new ViewAttribute()
-            ]);
-            if (!$policyDecision->isApplicable()) {
-                throw new \RuntimeException('No applicable policy found', 1572687491);
-            }
-            if ($policyDecision->getValue() === PolicyDecision::PERMIT) {
+            if ($this->hasAccess(
+                new WidgetAttribute($widget['identifier'], $widgetHash, $dashboardAttribute),
+                new ViewAttribute()
+            )) {
                 $widgets[$widgetHash] = $this->dashboardRepository->createWidgetRepresentation($widget['identifier'], $widget['config']);
             }
         }
@@ -183,20 +186,25 @@ class DashboardController extends AbstractController
     /**
      * @param ServerRequestInterface $request
      * @return ResponseInterface
+     * @throws RouteNotFoundExceptionAlias
      */
     public function removeWidgetAction(ServerRequestInterface $request): ResponseInterface
     {
         $parameters = $request->getQueryParams();
         $widgetHash = $parameters['widgetHash'];
         $dashboard = $this->dashboardRepository->getDashboardByIdentifier($this->getCurrentDashboard());
-        $widgets = [];
-        if ($dashboard !== null) {
+
+        if ($dashboard !== null && $this->hasAccess(
+            new DashboardAttribute($dashboard->getIdentifier()),
+            new RemoveWidgetAttribute()
+        )) {
             $widgets = $dashboard->getConfiguration()['widgets'] ?? [];
+            if (array_key_exists($widgetHash, $widgets)) {
+                unset($widgets[$widgetHash]);
+                $this->dashboardRepository->updateWidgets($dashboard, $widgets);
+            }
         }
-        if (array_key_exists($widgetHash, $widgets)) {
-            unset($widgets[$widgetHash]);
-            $this->dashboardRepository->updateWidgets($dashboard, $widgets);
-        }
+
         $route = $this->uriBuilder->buildUriFromRoute('dashboard', ['action' => 'main']);
         return new RedirectResponse($route);
     }
@@ -204,18 +212,19 @@ class DashboardController extends AbstractController
     /**
      * @param ServerRequestInterface $request
      * @return ResponseInterface
+     * @throws RouteNotFoundExceptionAlias
      */
     public function addWidgetAction(ServerRequestInterface $request): ResponseInterface
     {
         $parameters = $request->getQueryParams();
         $widgetKey = $parameters['widget'];
+        $dashboard = $this->dashboardRepository->getDashboardByIdentifier($this->getCurrentDashboard());
 
-        if ($widgetKey) {
-            $dashboard = $this->dashboardRepository->getDashboardByIdentifier($this->getCurrentDashboard());
-            $widgets = [];
-            if ($dashboard !== null) {
-                $widgets = $dashboard->getConfiguration()['widgets'] ?? [];
-            }
+        if ($dashboard !== null && $widgetKey && $this->hasAccess(
+            new DashboardAttribute($dashboard->getIdentifier()),
+            new AddWidgetAttribute()
+        )) {
+            $widgets = $dashboard->getConfiguration()['widgets'] ?? [];
             $hash = sha1($widgetKey . '-' . time());
             // @TODO: The creation of $widgets is not perfect, we should move this into a central place and work with objects
             $widgets[$hash] = ['identifier' => $widgetKey, 'config' => json_decode('[]', false)];
@@ -229,6 +238,7 @@ class DashboardController extends AbstractController
     /**
      * @param ServerRequestInterface $request
      * @return ResponseInterface
+     * @throws RouteNotFoundExceptionAlias
      */
     public function addDashboardAction(ServerRequestInterface $request): ResponseInterface
     {
@@ -236,7 +246,12 @@ class DashboardController extends AbstractController
         $dashboardIdentifier = $parameters['dashboard'] ?? '';
 
         $route = $this->uriBuilder->buildUriFromRoute('dashboard', ['action' => 'main']);
-        if ($dashboardIdentifier !== '') {
+
+        if ($dashboardIdentifier !== '' && $this->hasAccess(
+            // @TODO: DashboardAttribute without identifier? Does it work?
+            new DashboardAttribute(''),
+            new AddDashboardAttribute()
+        )) {
             $dashboard = $this->dashboardRepository->createDashboard($this->dashboardConfiguration->getDashboards()[$dashboardIdentifier]);
             $route = $this->uriBuilder->buildUriFromRoute('dashboard', ['action' => 'setActiveDashboard', 'currentDashboard' => $dashboard->getIdentifier()]);
         }
@@ -279,14 +294,10 @@ class DashboardController extends AbstractController
     {
         $dashboards = [];
         foreach ($this->dashboardRepository->getAllDashboards() as $dashboard) {
-            $policyDecision = $this->policyDecisionPoint->authorize([
-                'resource' => new DashboardAttribute($dashboard->getIdentifier()),
-                'action' => new ViewAttribute()
-            ]);
-            if (!$policyDecision->isApplicable()) {
-                throw new \RuntimeException('No applicable policy found', 1572627070);
-            }
-            if ($policyDecision->getValue() === PolicyDecision::PERMIT) {
+            if ($this->hasAccess(
+                new DashboardAttribute($dashboard->getIdentifier()),
+                new ViewAttribute()
+            )) {
                 $dashboards[$dashboard->getIdentifier()] = $dashboard;
             }
         }

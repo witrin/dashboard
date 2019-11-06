@@ -3,8 +3,12 @@ declare(strict_types=1);
 
 namespace FriendsOfTYPO3\Dashboard\Controller;
 
+use TYPO3\CMS\Backend\Security\Attribute\ResourceAttribute;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Localization\LanguageService;
+use TYPO3\CMS\Security\Attribute\ActionAttribute;
+use TYPO3\CMS\Security\Policy\PolicyDecision;
+use TYPO3\CMS\Security\Policy\PolicyDecisionPoint;
 
 /**
  * Class AbstractController
@@ -13,6 +17,11 @@ use TYPO3\CMS\Core\Localization\LanguageService;
 class AbstractController
 {
     private const MODULE_DATA_CURRENT_DASHBOARD_IDENTIFIER = 'web_dashboard/current_dashboard/';
+
+    /**
+     * @var PolicyDecisionPoint
+     */
+    protected $policyDecisionPoint;
 
     protected function getBackendUser(): BackendUserAuthentication
     {
@@ -32,5 +41,17 @@ class AbstractController
     protected function setCurrentDashboard(string $identifier): void
     {
         $this->getBackendUser()->pushModuleData(self::MODULE_DATA_CURRENT_DASHBOARD_IDENTIFIER, $identifier);
+    }
+
+    protected function hasAccess(ResourceAttribute $resourceAttribute, ActionAttribute $actionAttribute): bool
+    {
+        $policyDecision = $this->policyDecisionPoint->authorize([
+            'resource' => $resourceAttribute,
+            'action' => $actionAttribute
+        ]);
+        if (!$policyDecision->isApplicable()) {
+            throw new \RuntimeException('No applicable policy found', 1572627070);
+        }
+        return $policyDecision->getValue() === PolicyDecision::PERMIT;
     }
 }

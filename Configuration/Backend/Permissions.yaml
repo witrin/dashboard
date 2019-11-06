@@ -2,21 +2,24 @@ TYPO3:
   CMS:
     Permission:
       Actions:
-        - 
+        -
           identifier: 'dashboard:view'
-        - 
+        -
+          identifier: 'dashboard:add-dashboard'
+        -
           identifier: 'dashboard:add-widget'
-        - 
+        -
           identifier: 'dashboard:remove-widget'
-        - 
+        -
           identifier: 'dashboard:edit-settings'
-        - 
+        -
           identifier: 'dashboard:edit-permissions'
       Resources:
         -
           identifier: 'dashboard:dashboard'
           actions:
             - 'dashboard:view'
+            - 'dashboard:add-dashboard'
             - 'dashboard:add-widget'
             - 'dashboard:remove-widget'
             - 'dashboard:edit-settings'
