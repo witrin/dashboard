@@ -45,7 +45,7 @@
     "typo3/cms-core": "^9.5 || 10.*@dev",
     "typo3/cms-extbase": "^9.5 || 10.*@dev",
     "typo3/cms-fluid": "^9.5 || 10.*@dev",
-    "typo3/cms-security": "dev-feature/backend-permissions",
+    "typo3/cms-backend-access-control": "10.*@dev",
     "psr/http-message": "^1.0",
     "symfony/finder": "^4.3",
     "typo3fluid/fluid": "^2.5"
@@ -77,7 +77,7 @@
   "repositories": [
     {
         "type": "git",
-        "url": "https://github.com/typo3-initiatives/security"
+        "url": "https://github.com/typo3-initiatives/backend-access-control"
     }
   ],
   "scripts": {
