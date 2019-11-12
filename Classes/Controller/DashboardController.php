@@ -7,12 +7,11 @@ use FriendsOfTYPO3\Dashboard\Configuration\Widget;
 use FriendsOfTYPO3\Dashboard\DashboardConfiguration;
 use FriendsOfTYPO3\Dashboard\Dashboards\AbstractDashboard;
 use FriendsOfTYPO3\Dashboard\Dashboards\DashboardRepository;
-use FriendsOfTYPO3\Dashboard\Security\Attribute\AddDashboardAttribute;
-use FriendsOfTYPO3\Dashboard\Security\Attribute\AddWidgetAttribute;
-use FriendsOfTYPO3\Dashboard\Security\Attribute\DashboardAttribute;
-use FriendsOfTYPO3\Dashboard\Security\Attribute\RemoveWidgetAttribute;
-use FriendsOfTYPO3\Dashboard\Security\Attribute\ViewAttribute;
-use FriendsOfTYPO3\Dashboard\Security\Attribute\WidgetAttribute;
+use FriendsOfTYPO3\Dashboard\Security\AccessControl\Attribute\AddAttribute;
+use FriendsOfTYPO3\Dashboard\Security\AccessControl\Attribute\DashboardAttribute;
+use FriendsOfTYPO3\Dashboard\Security\AccessControl\Attribute\RemoveAttribute;
+use FriendsOfTYPO3\Dashboard\Security\AccessControl\Attribute\ViewAttribute;
+use FriendsOfTYPO3\Dashboard\Security\AccessControl\Attribute\WidgetAttribute;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException as RouteNotFoundExceptionAlias;
@@ -25,7 +24,7 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\PathUtility;
 use TYPO3\CMS\Extbase\Mvc\View\ViewInterface;
 use TYPO3\CMS\Fluid\View\StandaloneView;
-use TYPO3\CMS\Security\Policy\PolicyDecisionPoint;
+use TYPO3\CMS\Security\AccessControl\Policy\PolicyDecisionPoint;
 
 /**
  * Class DashboardController
@@ -196,7 +195,7 @@ class DashboardController extends AbstractController
 
         if ($dashboard !== null && $this->hasAccess(
             new DashboardAttribute($dashboard->getIdentifier()),
-            new RemoveWidgetAttribute()
+            new RemoveAttribute()
         )) {
             $widgets = $dashboard->getConfiguration()['widgets'] ?? [];
             if (array_key_exists($widgetHash, $widgets)) {
@@ -222,7 +221,7 @@ class DashboardController extends AbstractController
 
         if ($dashboard !== null && $widgetKey && $this->hasAccess(
             new DashboardAttribute($dashboard->getIdentifier()),
-            new AddWidgetAttribute()
+            new AddAttribute()
         )) {
             $widgets = $dashboard->getConfiguration()['widgets'] ?? [];
             $hash = sha1($widgetKey . '-' . time());
@@ -250,7 +249,7 @@ class DashboardController extends AbstractController
         if ($dashboardIdentifier !== '' && $this->hasAccess(
             // @TODO: DashboardAttribute without identifier? Does it work?
             new DashboardAttribute(''),
-            new AddDashboardAttribute()
+            new AddAttribute()
         )) {
             $dashboard = $this->dashboardRepository->createDashboard($this->dashboardConfiguration->getDashboards()[$dashboardIdentifier]);
             $route = $this->uriBuilder->buildUriFromRoute('dashboard', ['action' => 'setActiveDashboard', 'currentDashboard' => $dashboard->getIdentifier()]);

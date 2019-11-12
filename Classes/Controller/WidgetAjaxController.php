@@ -6,15 +6,15 @@ namespace FriendsOfTYPO3\Dashboard\Controller;
 use FriendsOfTYPO3\Dashboard\Configuration\Widget;
 use FriendsOfTYPO3\Dashboard\DashboardConfiguration;
 use FriendsOfTYPO3\Dashboard\Dashboards\DashboardRepository;
-use FriendsOfTYPO3\Dashboard\Security\Attribute\DashboardAttribute;
-use FriendsOfTYPO3\Dashboard\Security\Attribute\RemoveWidgetAttribute;
-use FriendsOfTYPO3\Dashboard\Security\Attribute\WidgetAttribute;
+use FriendsOfTYPO3\Dashboard\Security\AccessControl\Attribute\DashboardAttribute;
+use FriendsOfTYPO3\Dashboard\Security\AccessControl\Attribute\RemoveWidgetAttribute;
+use FriendsOfTYPO3\Dashboard\Security\AccessControl\Attribute\WidgetAttribute;
 use FriendsOfTYPO3\Dashboard\Widgets\WidgetInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Core\Http\JsonResponse;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Security\Policy\PolicyDecisionPoint;
+use TYPO3\CMS\Security\AccessControl\Policy\PolicyDecisionPoint;
 
 /**
  * Class WidgetAjaxController

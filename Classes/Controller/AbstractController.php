@@ -3,12 +3,12 @@ declare(strict_types=1);
 
 namespace FriendsOfTYPO3\Dashboard\Controller;
 
-use TYPO3\CMS\Backend\Security\Attribute\ResourceAttribute;
+use TYPO3\CMS\Backend\Security\AccessControl\Attribute\ResourceAttribute;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Localization\LanguageService;
-use TYPO3\CMS\Security\Attribute\ActionAttribute;
-use TYPO3\CMS\Security\Policy\PolicyDecision;
-use TYPO3\CMS\Security\Policy\PolicyDecisionPoint;
+use TYPO3\CMS\Security\AccessControl\Attribute\ActionAttribute;
+use TYPO3\CMS\Security\AccessControl\Policy\PolicyDecision;
+use TYPO3\CMS\Security\AccessControl\Policy\PolicyDecisionPoint;
 
 /**
  * Class AbstractController

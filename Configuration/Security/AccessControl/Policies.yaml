@@ -5,13 +5,13 @@ TYPO3:
         Backend:
           policies:
             Dashboard:
-                target: 'resource.class matches "/^dashboard/"'
+                target: 'resource.namespace matches "/^dashboard/"'
                 description: Dashboard policy set.
                 algorithm: highestPriority
                 priority: 50
                 policies:
                   Widget:
-                    target: 'resource.class == "dashboard:widget"'
+                    target: 'resource.namespace == "dashboard:widget"'
                     description: Widget resource policy set.
                     algorithm: highestPriority
                     priority: 20
@@ -22,10 +22,10 @@ TYPO3:
                         priority: 30
                         rules:
                           -
-                            target: 'hasPermission("cms:backend:user", resource.dashboard.identifier, action.class, "deny")'
+                            target: 'hasPermission("cms:backend:user", resource.dashboard.name, action.name, "deny")'
                             effect: deny
                           -
-                            target: 'hasPermission("cms:backend:user", resource.dashboard.identifier, action.class, "permit")'
+                            target: 'hasPermission("cms:backend:user", resource.dashboard.name, action.name, "permit")'
                             effect: permit
                       Group:
                         description: Secondary principal policy.
@@ -33,10 +33,10 @@ TYPO3:
                         priority: 20
                         rules:
                           -
-                            target: 'hasPermission("cms:backend:group", resource.dashboard.identifier, action.class, "deny")'
+                            target: 'hasPermission("cms:backend:group", resource.dashboard.name, action.name, "deny")'
                             effect: deny
                           -
-                            target: 'hasPermission("cms:backend:group", resource.dashboard.identifier, action.class, "permit")'
+                            target: 'hasPermission("cms:backend:group", resource.dashboard.name, action.name, "permit")'
                             effect: permit
                       Type:
                         description: Widget type policy.
@@ -49,10 +49,10 @@ TYPO3:
                             priority: 20
                             rules:
                               -
-                                target: 'hasPermission("cms:backend:user", resource.type, action.class, "deny")'
+                                target: 'hasPermission("cms:backend:user", resource.type, action.name, "deny")'
                                 effect: deny
                               -
-                                target: 'hasPermission("cms:backend:user", resource.type, action.class, "permit")'
+                                target: 'hasPermission("cms:backend:user", resource.type, action.name, "permit")'
                                 effect: permit
                           Group:
                             description: Secondary principal policy.
@@ -60,13 +60,13 @@ TYPO3:
                             priority: 10
                             rules:
                               -
-                                target: 'hasPermission("cms:backend:group", resource.type, action.class, "deny")'
+                                target: 'hasPermission("cms:backend:group", resource.type, action.name, "deny")'
                                 effect: deny
                               -
-                                target: 'hasPermission("cms:backend:group", resource.type, action.class, "permit")'
+                                target: 'hasPermission("cms:backend:group", resource.type, action.name, "permit")'
                                 effect: permit
                   Dashboard:
-                    target: 'resource.class in ["dashboard:dashboard", "dashboard:widget"]'
+                    target: 'resource.namespace in ["dashboard:dashboard", "dashboard:widget"]'
                     description: Dashboard resource policy set.
                     algorithm: highestPriority
                     priority: 10
@@ -77,10 +77,10 @@ TYPO3:
                         priority: 20
                         rules:
                           -
-                            target: 'hasPermission("cms:backend:user", resource.identifier, action.class, "deny")'
+                            target: 'hasPermission("cms:backend:user", resource.name, action.name, "deny")'
                             effect: deny
                           -
-                            target: 'hasPermission("cms:backend:user", resource.identifier, action.class, "permit")'
+                            target: 'hasPermission("cms:backend:user", resource.name, action.name, "permit")'
                             effect: permit
                       Group:
                         description: Secondary principal policy.
@@ -88,10 +88,10 @@ TYPO3:
                         priority: 10
                         rules:
                           -
-                            target: 'hasPermission("cms:backend:group", resource.identifier, action.class, "deny")'
+                            target: 'hasPermission("cms:backend:group", resource.name, action.name, "deny")'
                             effect: deny
                           -
-                            target: 'hasPermission("cms:backend:group", resource.identifier, action.class, "permit")'
+                            target: 'hasPermission("cms:backend:group", resource.name, action.name, "permit")'
                             effect: permit
                       Default:
                         description: Fallback policy.
