@@ -16,7 +16,7 @@ namespace FriendsOfTYPO3\Dashboard\Security\AccessControl\Attribute;
  * The TYPO3 project - inspiring people to share!
  */
 
-use TYPO3\CMS\Security\AccessControl\Attribute\ActionAttribute;
+use TYPO3\AccessControl\Attribute\ActionAttribute;
 
 /**
  * @api

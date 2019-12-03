@@ -24,7 +24,7 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\PathUtility;
 use TYPO3\CMS\Extbase\Mvc\View\ViewInterface;
 use TYPO3\CMS\Fluid\View\StandaloneView;
-use TYPO3\CMS\Security\AccessControl\Policy\PolicyDecisionPoint;
+use TYPO3\AccessControl\Policy\PolicyDecisionPoint;
 
 /**
  * Class DashboardController

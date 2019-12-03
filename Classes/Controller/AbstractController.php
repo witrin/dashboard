@@ -6,9 +6,9 @@ namespace FriendsOfTYPO3\Dashboard\Controller;
 use TYPO3\CMS\Backend\Security\AccessControl\Attribute\ResourceAttribute;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Localization\LanguageService;
-use TYPO3\CMS\Security\AccessControl\Attribute\ActionAttribute;
-use TYPO3\CMS\Security\AccessControl\Policy\PolicyDecision;
-use TYPO3\CMS\Security\AccessControl\Policy\PolicyDecisionPoint;
+use TYPO3\AccessControl\Attribute\ActionAttribute;
+use TYPO3\AccessControl\Policy\PolicyDecision;
+use TYPO3\AccessControl\Policy\PolicyDecisionPoint;
 
 /**
  * Class AbstractController

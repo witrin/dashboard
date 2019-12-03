@@ -14,7 +14,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Core\Http\JsonResponse;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Security\AccessControl\Policy\PolicyDecisionPoint;
+use TYPO3\AccessControl\Policy\PolicyDecisionPoint;
 
 /**
  * Class WidgetAjaxController

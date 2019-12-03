@@ -26,9 +26,9 @@ use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
 use TYPO3\CMS\Core\Exception\InvalidArgumentException;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Security\AccessControl\Attribute\PrincipalAttribute;
-use TYPO3\CMS\Security\AccessControl\Event\AttributeRetrivalEvent;
-use TYPO3\CMS\Security\AccessControl\Utility\PrincipalUtility;
+use TYPO3\AccessControl\Attribute\PrincipalAttribute;
+use TYPO3\AccessControl\Event\AttributeRetrievalEvent;
+use TYPO3\AccessControl\Utility\PrincipalUtility;
 
 /**
  * @internal
@@ -53,7 +53,7 @@ class PermissionAttributeProvider
     /**
      * @inheritdoc
      */
-    public function __invoke(AttributeRetrivalEvent $event): void
+    public function __invoke(AttributeRetrievalEvent $event): void
     {
         $resourceAttribute = $event->getAttribute();
 

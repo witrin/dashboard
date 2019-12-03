@@ -17,7 +17,7 @@ namespace FriendsOfTYPO3\Dashboard\Security\AccessControl\Attribute;
  */
 
 use TYPO3\CMS\Backend\Security\AccessControl\Attribute\ResourceAttribute;
-use TYPO3\CMS\Security\AccessControl\Utility\AttributeUtility;
+use TYPO3\AccessControl\Utility\AttributeUtility;
 
 /**
  * @api
